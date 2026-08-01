@@ -204,39 +204,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Dynamic background opacity transitions based on active section (scrubbed for perfect smoothness)
-          // 1. Fade out as we scroll out of Hero
+          // Fade out background canvas completely when scrolling down from the Hero section
           ScrollTrigger.create({
             trigger: "#hero",
-            start: "bottom center",
+            start: "top top",
             end: "bottom top",
             scrub: true,
             onUpdate: self => {
-              const opacity = 1.0 - (self.progress * 0.85); // fades from 1.0 to 0.15
-              gsap.set(canvas, { opacity: opacity });
-            }
-          });
-
-          // 2. Fade in as we scroll into Videos
-          ScrollTrigger.create({
-            trigger: "#videos",
-            start: "top bottom",
-            end: "top center",
-            scrub: true,
-            onUpdate: self => {
-              const opacity = 0.15 + (self.progress * 0.85); // fades from 0.15 to 1.0
-              gsap.set(canvas, { opacity: opacity });
-            }
-          });
-
-          // 3. Fade out as we scroll out of Videos
-          ScrollTrigger.create({
-            trigger: "#videos",
-            start: "bottom center",
-            end: "bottom top",
-            scrub: true,
-            onUpdate: self => {
-              const opacity = 1.0 - (self.progress * 0.8); // fades from 1.0 to 0.2
+              const opacity = Math.max(0, 1.0 - self.progress);
               gsap.set(canvas, { opacity: opacity });
             }
           });
