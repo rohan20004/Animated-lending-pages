@@ -204,27 +204,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
 
-          // Dynamic background opacity transitions based on active section
-          const opacitySections = [
-            { id: '#hero', opacity: 1.0 },
-            { id: '#wedding', opacity: 0.15 },
-            { id: '#categories', opacity: 0.7 },
-            { id: '#features', opacity: 0.3 },
-            { id: '#videos', opacity: 1.0 },
-            { id: '#testimonials', opacity: 0.6 },
-            { id: '#reserve', opacity: 0.2 }
-          ];
+          // Dynamic background opacity transitions based on active section (scrubbed for perfect smoothness)
+          // 1. Fade out as we scroll out of Hero
+          ScrollTrigger.create({
+            trigger: "#hero",
+            start: "bottom center",
+            end: "bottom top",
+            scrub: true,
+            onUpdate: self => {
+              const opacity = 1.0 - (self.progress * 0.85); // fades from 1.0 to 0.15
+              gsap.set(canvas, { opacity: opacity });
+            }
+          });
 
-          opacitySections.forEach(sec => {
-            const el = document.querySelector(sec.id);
-            if (el) {
-              ScrollTrigger.create({
-                trigger: sec.id,
-                start: "top center",
-                end: "bottom center",
-                onEnter: () => gsap.to(canvas, { opacity: sec.opacity, duration: 0.8, ease: "power2.out" }),
-                onEnterBack: () => gsap.to(canvas, { opacity: sec.opacity, duration: 0.8, ease: "power2.out" })
-              });
+          // 2. Fade in as we scroll into Videos
+          ScrollTrigger.create({
+            trigger: "#videos",
+            start: "top bottom",
+            end: "top center",
+            scrub: true,
+            onUpdate: self => {
+              const opacity = 0.15 + (self.progress * 0.85); // fades from 0.15 to 1.0
+              gsap.set(canvas, { opacity: opacity });
+            }
+          });
+
+          // 3. Fade out as we scroll out of Videos
+          ScrollTrigger.create({
+            trigger: "#videos",
+            start: "bottom center",
+            end: "bottom top",
+            scrub: true,
+            onUpdate: self => {
+              const opacity = 1.0 - (self.progress * 0.8); // fades from 1.0 to 0.2
+              gsap.set(canvas, { opacity: opacity });
             }
           });
           
