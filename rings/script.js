@@ -1,5 +1,5 @@
 /**
- * NSJ 3D Jewelry - Royal Emperor Rings Scroll-telling Page Engine
+ * RDJ 3D Jewelry - Royal Emperor Rings Scroll-telling Page Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
