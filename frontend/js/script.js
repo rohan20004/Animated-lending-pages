@@ -58,16 +58,110 @@ document.addEventListener('DOMContentLoaded', () => {
     return `images/home/${paddedIndex}.png`;
   }
 
-  // Preload and process all frames to make background transparent
+  // Preload frames progressively to make the initial page load 4x faster!
   function preloadImages() {
     return new Promise((resolve) => {
-      let loadedImagesCount = 0;
+      // Step 1: Divide frames into primary (every 4th frame) and secondary
+      const primaryFrames = [];
+      const secondaryFrames = [];
+      
       for (let i = 1; i <= totalFrames; i++) {
-        const img = new Image();
-        img.src = getFrameUrl(i);
+        if (i === 1 || i === totalFrames || i % 4 === 0) {
+          primaryFrames.push(i);
+        } else {
+          secondaryFrames.push(i);
+        }
+      }
+      
+      let loadedPrimaryCount = 0;
+      
+      // Load a frame
+      function loadFrame(i) {
+        return new Promise((frameResolve) => {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+          
+          img.onload = () => {
+            processImage(img, i, frameResolve);
+          };
+          
+          img.onerror = () => {
+            console.error(`Failed to load frame at: ${img.src}`);
+            frameResolve();
+          };
+        });
+      }
+      
+      // Process image to remove background
+      function processImage(img, i, frameResolve) {
+        const offCanvas = document.createElement('canvas');
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        offCanvas.width = w;
+        offCanvas.height = h;
         
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(img, 0, 0);
+        
+        try {
+          const imgData = offCtx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+          
+          for (let j = 0; j < data.length; j += 4) {
+            const r = data[j];
+            const g = data[j+1];
+            const b = data[j+2];
+            const maxVal = Math.max(r, g, b);
+            
+            if (maxVal < 24) {
+              data[j+3] = 0; // Fully transparent
+            } else if (maxVal < 32) {
+              const ratio = (maxVal - 24) / (32 - 24);
+              data[j+3] = Math.round(ratio * 255);
+            }
+          }
+          offCtx.putImageData(imgData, 0, 0);
+          
+          const wmX = Math.round(0.85 * w);
+          const wmY = Math.round(0.75 * h);
+          offCtx.clearRect(wmX, wmY, w - wmX, h - wmY);
+          
+          images[i - 1] = offCanvas;
+        } catch (e) {
+          images[i - 1] = img;
+        }
+        frameResolve();
+      }
+      
+      // Load primary frames first (this determines the preloader screen)
+      const primaryPromises = primaryFrames.map(i => {
+        return loadFrame(i).then(() => {
+          loadedPrimaryCount++;
+          const percent = Math.round((loadedPrimaryCount / primaryFrames.length) * 100);
+          if (loadingBar) loadingBar.style.width = `${percent}%`;
+          if (loadingText) loadingText.textContent = `Loading 3D asset... ${percent}%`;
+        });
+      });
+      
+      // Once all primary frames are loaded, resolve the promise so the site opens!
+      Promise.all(primaryPromises).then(() => {
+        resolve();
+        
+        // Step 2: Load secondary frames in the background after page reveal
+        setTimeout(() => {
+          loadSecondaryProgressively(secondaryFrames);
+        }, 1000);
+      });
+    });
+  }
+
+  // Load secondary frames one by one in the background so it doesn't block the UI thread
+  async function loadSecondaryProgressively(framesList) {
+    for (const frameIndex of framesList) {
+      await new Promise((frameResolve) => {
+        const img = new Image();
+        img.src = getFrameUrl(frameIndex);
         img.onload = () => {
-          // Create offscreen canvas to process the image and remove background
           const offCanvas = document.createElement('canvas');
           const w = img.naturalWidth;
           const h = img.naturalHeight;
@@ -81,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const imgData = offCtx.getImageData(0, 0, w, h);
             const data = imgData.data;
             
-            // Loop through pixels and make the dark background transparent
             for (let j = 0; j < data.length; j += 4) {
               const r = data[j];
               const g = data[j+1];
@@ -89,54 +182,29 @@ document.addEventListener('DOMContentLoaded', () => {
               const maxVal = Math.max(r, g, b);
               
               if (maxVal < 24) {
-                data[j+3] = 0; // Fully transparent
+                data[j+3] = 0;
               } else if (maxVal < 32) {
-                // Feather the edges
                 const ratio = (maxVal - 24) / (32 - 24);
                 data[j+3] = Math.round(ratio * 255);
               }
             }
             offCtx.putImageData(imgData, 0, 0);
             
-            // Clear the watermark in the bottom-right corner (approx 85% width, 75% height)
             const wmX = Math.round(0.85 * w);
             const wmY = Math.round(0.75 * h);
-            const wmW = w - wmX;
-            const wmH = h - wmY;
-            offCtx.clearRect(wmX, wmY, wmW, wmH);
+            offCtx.clearRect(wmX, wmY, w - wmX, h - wmY);
             
-            images[i - 1] = offCanvas;
+            images[frameIndex - 1] = offCanvas;
           } catch (e) {
-            console.error("Error processing image background:", e);
-            images[i - 1] = img; // Fallback to raw image
+            images[frameIndex - 1] = img;
           }
-          
-          loadedImagesCount++;
-          loadedCount = loadedImagesCount;
-          updateLoadingProgress();
-          if (loadedImagesCount === totalFrames) {
-            resolve();
-          }
+          frameResolve();
         };
-
         img.onerror = () => {
-          console.error(`Failed to load frame at: ${img.src}`);
-          loadedImagesCount++;
-          loadedCount = loadedImagesCount;
-          updateLoadingProgress();
-          if (loadedImagesCount === totalFrames) {
-            resolve();
-          }
+          frameResolve();
         };
-      }
-    });
-  }
-
-  // Update preloader UI
-  function updateLoadingProgress() {
-    const percent = Math.round((loadedCount / totalFrames) * 100);
-    if (loadingBar) loadingBar.style.width = `${percent}%`;
-    if (loadingText) loadingText.textContent = `Loading 3D asset... ${percent}%`;
+      });
+    }
   }
 
   // Reveal site after assets are loaded
@@ -288,7 +356,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Draw specific image frame onto canvas
   function drawFrame(frameIndex) {
     const imgIndex = Math.min(totalFrames, Math.max(1, frameIndex)) - 1;
-    const img = images[imgIndex];
+    let img = images[imgIndex];
+    
+    // Fallback to nearest loaded frame if this frame is still loading in the background
+    if (!img) {
+      for (let offset = 1; offset < totalFrames; offset++) {
+        const leftIndex = imgIndex - offset;
+        const rightIndex = imgIndex + offset;
+        if (leftIndex >= 0 && images[leftIndex]) {
+          img = images[leftIndex];
+          break;
+        }
+        if (rightIndex < totalFrames && images[rightIndex]) {
+          img = images[rightIndex];
+          break;
+        }
+      }
+    }
+    
     if (!img) return;
 
     const imgWidth = img.naturalWidth || img.width;

@@ -38,8 +38,16 @@ const server = http.createServer((req, res) => {
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    const headers = { 'Content-Type': contentType };
 
-    res.writeHead(200, { 'Content-Type': contentType });
+    // Enable caching for static resources, but require validation for HTML
+    if (ext === '.html') {
+      headers['Cache-Control'] = 'public, max-age=0, must-revalidate';
+    } else if (['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico'].includes(ext)) {
+      headers['Cache-Control'] = 'public, max-age=31536000, immutable';
+    }
+
+    res.writeHead(200, headers);
     fs.createReadStream(filePath).pipe(res);
   });
 });
