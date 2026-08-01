@@ -410,8 +410,6 @@ a {
   border-radius: 4px;
   width: 100%;
   max-width: 580px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
@@ -536,8 +534,6 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 3rem;
   border-radius: 4px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .detail-section-title {
@@ -590,8 +586,6 @@ a {
   position: relative;
   overflow: hidden;
   max-width: 450px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
 
@@ -675,8 +669,6 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 3rem;
   border-radius: 4px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
 
