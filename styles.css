@@ -345,9 +345,10 @@ a {
   letter-spacing: 0.4em;
   margin-bottom: 1rem;
   text-indent: 0.4em;
-  background: linear-gradient(to right, var(--text-primary) 30%, var(--gold-primary) 100%);
+  background: linear-gradient(to bottom, #ffffff 20%, #dedede 60%, #b5b5b5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 5px rgba(0, 0, 0, 0.9));
   animation: titleGlow 4s infinite alternate;
 }
 
@@ -804,8 +805,12 @@ a {
 }
 
 @keyframes titleGlow {
-  from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.05); }
-  to { text-shadow: 0 0 25px var(--gold-glow); }
+  from {
+    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 5px rgba(0, 0, 0, 0.9));
+  }
+  to {
+    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
+  }
 }
 
 @keyframes scrollBounce {
