@@ -1,5 +1,5 @@
 /**
- * NSJ 3D Jewelry - Earrings Page Scroll-telling Animation Engine
+ * RDJ 3D Jewelry - Earrings Page Scroll-telling Animation Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
