@@ -1,5 +1,5 @@
 /**
- * RDJ 3D Jewelry - Product Detail Page Scroll-telling Animation Engine
+ * RDJ 3D Jewelry - Royal Emperor Rings Scroll-telling Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,15 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelector('.nav-links');
   const canvas = document.getElementById('scroll-canvas');
   const ctx = canvas.getContext('2d');
-  
-  // Panel elements for scroll reveal
   const panelInners = document.querySelectorAll('.panel-inner');
 
-  // Register GSAP plugins
-  gsap.registerPlugin(ScrollTrigger);
-
   // Animation & Frame Configuration
-  const totalFrames = 80;
+  const totalFrames = 79; // 02.png to 80.png (skipping blank 01.png)
   const images = [];
   let loadedCount = 0;
   let scrollState = { frame: 1 };
@@ -52,37 +47,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Generate padded frame filename
+  // Generate padded frame filename (skipping the blank 01.png)
   function getFrameUrl(index) {
-    const paddedIndex = String(index).padStart(3, '0');
-    return `Bangles/${paddedIndex}.png`;
+    const paddedIndex = String(index + 1).padStart(2, '0');
+    return `images/rings/${paddedIndex}.png`;
   }
 
-  // Preload and pre-decode all frames
+  // Preload and process all frames to make background transparent
   function preloadImages() {
     return new Promise((resolve) => {
+      let loadedImagesCount = 0;
       for (let i = 1; i <= totalFrames; i++) {
         const img = new Image();
         img.src = getFrameUrl(i);
         
         img.onload = () => {
-          loadedCount++;
+          // Create offscreen canvas to process the image and remove background
+          const offCanvas = document.createElement('canvas');
+          const w = img.naturalWidth;
+          const h = img.naturalHeight;
+          offCanvas.width = w;
+          offCanvas.height = h;
+          
+          const offCtx = offCanvas.getContext('2d');
+          offCtx.drawImage(img, 0, 0);
+          
+          try {
+            const imgData = offCtx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            
+            // Loop through pixels and make the R=16 background transparent
+            for (let j = 0; j < data.length; j += 4) {
+              const r = data[j];
+              const g = data[j+1];
+              const b = data[j+2];
+              const maxVal = Math.max(r, g, b);
+              
+              if (maxVal < 24) {
+                data[j+3] = 0; // Fully transparent
+              } else if (maxVal < 32) {
+                // Feather the edges
+                const ratio = (maxVal - 24) / (32 - 24);
+                data[j+3] = Math.round(ratio * 255);
+              }
+            }
+            offCtx.putImageData(imgData, 0, 0);
+            
+            // Clear the watermark in the bottom-right corner (approx 85% width, 75% height)
+            const wmX = Math.round(0.85 * w);
+            const wmY = Math.round(0.75 * h);
+            const wmW = w - wmX;
+            const wmH = h - wmY;
+            offCtx.clearRect(wmX, wmY, wmW, wmH);
+            
+            images[i - 1] = offCanvas;
+          } catch (e) {
+            console.error("Error processing image background:", e);
+            images[i - 1] = img; // Fallback to raw image
+          }
+          
+          loadedImagesCount++;
+          loadedCount = loadedImagesCount;
           updateLoadingProgress();
-          if (loadedCount === totalFrames) {
+          if (loadedImagesCount === totalFrames) {
             resolve();
           }
         };
 
         img.onerror = () => {
           console.error(`Failed to load frame at: ${img.src}`);
-          loadedCount++;
+          loadedImagesCount++;
+          loadedCount = loadedImagesCount;
           updateLoadingProgress();
-          if (loadedCount === totalFrames) {
+          if (loadedImagesCount === totalFrames) {
             resolve();
           }
         };
-
-        images.push(img);
       }
     });
   }
@@ -119,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { reduceMotion } = context.conditions;
         
         if (reduceMotion) {
-          // Reduced motion: draw first frame and do not smooth-scroll or scrub frames
+          // Reduced motion: draw first frame and do not smooth-scroll
           scrollState.frame = 1;
           drawFrame(1);
         } else {
@@ -160,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
           // Custom data-speed parallax implementation via ScrollTrigger
           gsap.utils.toArray('[data-speed]').forEach(el => {
             const speed = parseFloat(el.getAttribute('data-speed')) || 1;
-            // Map the relative speed difference to displacement
             const yTranslation = (speed - 1) * 150;
             gsap.to(el, {
               y: yTranslation,
@@ -173,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             });
           });
+          
+          // Refresh ScrollTrigger to ensure accurate page height calculations
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, 200);
         }
       });
     }, 600);
@@ -200,17 +244,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawFrame(frameIndex) {
     const imgIndex = Math.min(totalFrames, Math.max(1, frameIndex)) - 1;
     const img = images[imgIndex];
-    if (!img || !img.complete || img.naturalWidth === 0) return;
+    if (!img) return;
+
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+    if (imgWidth === 0 || imgHeight === 0) return;
+    if (img.tagName === 'IMG' && !img.complete) return;
 
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const canvasWidth = canvas.width / dpr;
     const canvasHeight = canvas.height / dpr;
 
-    // Clear canvas to prevent trails/artifacts from previous frames
+    // Clear canvas to prevent trails
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    const imgWidth = img.naturalWidth;
-    const imgHeight = img.naturalHeight;
 
     const canvasRatio = canvasWidth / canvasHeight;
     const imgRatio = imgWidth / imgHeight;
@@ -230,15 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-
-    // Cover the watermark star/text in the bottom-right corner of the image frame
-    const wX = drawX + 0.88 * drawWidth;
-    const wY = drawY + 0.79 * drawHeight;
-    const wWidth = 0.11 * drawWidth;
-    const wHeight = 0.19 * drawHeight;
-
-    ctx.fillStyle = '#010101';
-    ctx.fillRect(wX, wY, wWidth, wHeight);
 
     lastDrawnFrame = frameIndex;
   }

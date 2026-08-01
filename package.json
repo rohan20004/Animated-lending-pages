@@ -1,0 +1,12 @@
+{
+  "name": "rdj-jewelry-shop",
+  "version": "1.0.0",
+  "description": "3D scroll-based jewelry landing shop",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

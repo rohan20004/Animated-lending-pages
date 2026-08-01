@@ -1,5 +1,5 @@
 /**
- * RDJ 3D Jewelry - Earrings Page Scroll-telling Animation Engine
+ * RDJ 3D Jewelry - Product Detail Page Scroll-telling Animation Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   gsap.registerPlugin(ScrollTrigger);
 
   // Animation & Frame Configuration
-  const totalFrames = 79; // 02.png to 80.png (skipping blank 01.png)
+  const totalFrames = 80;
   const images = [];
   let loadedCount = 0;
   let scrollState = { frame: 1 };
@@ -52,83 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Generate padded frame filename (skipping the blank 01.png)
+  // Generate padded frame filename
   function getFrameUrl(index) {
-    // index is 1 to 79. We map to 02.png through 80.png.
-    const paddedIndex = String(index + 1).padStart(2, '0');
-    return `Earnings/${paddedIndex}.png`;
+    const paddedIndex = String(index).padStart(3, '0');
+    return `images/Bangles/${paddedIndex}.png`;
   }
 
-  // Preload and process all frames to make background transparent
+  // Preload and pre-decode all frames
   function preloadImages() {
     return new Promise((resolve) => {
-      let loadedImagesCount = 0;
       for (let i = 1; i <= totalFrames; i++) {
         const img = new Image();
         img.src = getFrameUrl(i);
         
         img.onload = () => {
-          // Create offscreen canvas to process the image and remove background
-          const offCanvas = document.createElement('canvas');
-          const w = img.naturalWidth;
-          const h = img.naturalHeight;
-          offCanvas.width = w;
-          offCanvas.height = h;
-          
-          const offCtx = offCanvas.getContext('2d');
-          offCtx.drawImage(img, 0, 0);
-          
-          try {
-            const imgData = offCtx.getImageData(0, 0, w, h);
-            const data = imgData.data;
-            
-            // Loop through pixels and make the dark background transparent
-            for (let j = 0; j < data.length; j += 4) {
-              const r = data[j];
-              const g = data[j+1];
-              const b = data[j+2];
-              const maxVal = Math.max(r, g, b);
-              
-              if (maxVal < 25) {
-                data[j+3] = 0; // Fully transparent
-              } else if (maxVal < 36) {
-                // Feather the edges
-                const ratio = (maxVal - 25) / (36 - 25);
-                data[j+3] = Math.round(ratio * 255);
-              }
-            }
-            offCtx.putImageData(imgData, 0, 0);
-            
-            // Clear the watermark in the bottom-right corner (approx 87% width, 78% height)
-            const wmX = Math.round(0.87 * w);
-            const wmY = Math.round(0.78 * h);
-            const wmW = w - wmX;
-            const wmH = h - wmY;
-            offCtx.clearRect(wmX, wmY, wmW, wmH);
-            
-            images[i - 1] = offCanvas;
-          } catch (e) {
-            console.error("Error processing image background:", e);
-            images[i - 1] = img; // Fallback to raw image
-          }
-          
-          loadedImagesCount++;
-          loadedCount = loadedImagesCount;
+          loadedCount++;
           updateLoadingProgress();
-          if (loadedImagesCount === totalFrames) {
+          if (loadedCount === totalFrames) {
             resolve();
           }
         };
 
         img.onerror = () => {
           console.error(`Failed to load frame at: ${img.src}`);
-          loadedImagesCount++;
-          loadedCount = loadedImagesCount;
+          loadedCount++;
           updateLoadingProgress();
-          if (loadedImagesCount === totalFrames) {
+          if (loadedCount === totalFrames) {
             resolve();
           }
         };
+
+        images.push(img);
       }
     });
   }
@@ -246,12 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawFrame(frameIndex) {
     const imgIndex = Math.min(totalFrames, Math.max(1, frameIndex)) - 1;
     const img = images[imgIndex];
-    if (!img) return;
-
-    const imgWidth = img.naturalWidth || img.width;
-    const imgHeight = img.naturalHeight || img.height;
-    if (imgWidth === 0 || imgHeight === 0) return;
-    if (img.tagName === 'IMG' && !img.complete) return;
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const canvasWidth = canvas.width / dpr;
@@ -259,6 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clear canvas to prevent trails/artifacts from previous frames
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    const imgWidth = img.naturalWidth;
+    const imgHeight = img.naturalHeight;
 
     const canvasRatio = canvasWidth / canvasHeight;
     const imgRatio = imgWidth / imgHeight;
@@ -278,6 +230,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+    // Cover the watermark star/text in the bottom-right corner of the image frame
+    const wX = drawX + 0.88 * drawWidth;
+    const wY = drawY + 0.79 * drawHeight;
+    const wWidth = 0.11 * drawWidth;
+    const wHeight = 0.19 * drawHeight;
+
+    ctx.fillStyle = '#010101';
+    ctx.fillRect(wX, wY, wWidth, wHeight);
 
     lastDrawnFrame = frameIndex;
   }

@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Generate padded frame filename (skipping the blank 01.png)
   function getFrameUrl(index) {
     const paddedIndex = String(index + 1).padStart(2, '0');
-    return `home/${paddedIndex}.png`;
+    return `images/home/${paddedIndex}.png`;
   }
 
   // Preload and process all frames to make background transparent
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const earringsImgElement = document.querySelector('img[alt="Earrings"]');
   if (earringsImgElement) {
     const tempImg = new Image();
-    tempImg.src = 'Earnings/02.png';
+    tempImg.src = 'images/Earnings/02.png';
     tempImg.onload = () => {
       const offCanvas = document.createElement('canvas');
       const w = tempImg.naturalWidth;
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
         earringsImgElement.src = offCanvas.toDataURL();
       } catch (e) {
         console.error("Error processing category image:", e);
-        earringsImgElement.src = 'Earnings/02.png';
+        earringsImgElement.src = 'images/Earnings/02.png';
       }
     };
   }

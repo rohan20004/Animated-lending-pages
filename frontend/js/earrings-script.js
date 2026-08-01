@@ -1,5 +1,5 @@
 /**
- * RDJ 3D Jewelry - Royal Emperor Necklace Scroll-telling Page Engine
+ * RDJ 3D Jewelry - Earrings Page Scroll-telling Animation Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,16 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelector('.nav-links');
   const canvas = document.getElementById('scroll-canvas');
   const ctx = canvas.getContext('2d');
-  const scrollSection = document.getElementById('scroll-section');
+  
+  // Panel elements for scroll reveal
+  const panelInners = document.querySelectorAll('.panel-inner');
+
+  // Register GSAP plugins
+  gsap.registerPlugin(ScrollTrigger);
 
   // Animation & Frame Configuration
-  const totalFrames = 51; // clean rotation: 12.png to 39.png, and 51.png to 73.png
+  const totalFrames = 79; // 02.png to 80.png (skipping blank 01.png)
   const images = [];
   let loadedCount = 0;
-  
-  // Custom Smooth Scrolling / Easing variables
-  let currentFrame = 1;
-  let targetFrame = 1;
+  let scrollState = { frame: 1 };
   let lastDrawnFrame = -1;
   let isLoaded = false;
 
@@ -50,19 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Generate padded frame filename (skipping blank, collage, and earrings frames)
+  // Generate padded frame filename (skipping the blank 01.png)
   function getFrameUrl(index) {
-    // index is 1 to 51.
-    // 1 to 28 map to 12.png to 39.png (index + 11)
-    // 29 to 51 map to 51.png to 73.png (index + 22)
-    let fileIndex;
-    if (index <= 28) {
-      fileIndex = index + 11;
-    } else {
-      fileIndex = index + 22;
-    }
-    const paddedIndex = String(fileIndex).padStart(2, '0');
-    return `${paddedIndex}.png`;
+    // index is 1 to 79. We map to 02.png through 80.png.
+    const paddedIndex = String(index + 1).padStart(2, '0');
+    return `images/Earnings/${paddedIndex}.png`;
   }
 
   // Preload and process all frames to make background transparent
@@ -95,11 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
               const b = data[j+2];
               const maxVal = Math.max(r, g, b);
               
-              if (maxVal < 32) {
+              if (maxVal < 25) {
                 data[j+3] = 0; // Fully transparent
-              } else if (maxVal < 42) {
+              } else if (maxVal < 36) {
                 // Feather the edges
-                const ratio = (maxVal - 32) / (42 - 32);
+                const ratio = (maxVal - 25) / (36 - 25);
                 data[j+3] = Math.round(ratio * 255);
               }
             }
@@ -139,38 +133,98 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Update preloader UI progress
+  // Update preloader UI
   function updateLoadingProgress() {
     const percent = Math.round((loadedCount / totalFrames) * 100);
     if (loadingBar) loadingBar.style.width = `${percent}%`;
-    if (loadingText) loadingText.textContent = `Loading 3D experience... ${percent}%`;
+    if (loadingText) loadingText.textContent = `Loading 3D asset... ${percent}%`;
   }
 
-  // Reveal site after assets are loaded and trigger animation loop
+  // Reveal site after assets are loaded
   function revealSite() {
     isLoaded = true;
     setTimeout(() => {
-      if (preloader) {
-        preloader.classList.add('fade-out');
-      }
+      preloader.classList.add('fade-out');
       
-      // Initialize canvas dimension layout
+      // Initialize layout
       resizeCanvas();
       
-      // Force draw of first frame
-      currentFrame = 1;
-      targetFrame = 1;
+      initScrollRevealObserver();
+      
+      // Force initial draw of first frame
+      scrollState.frame = 1;
       drawFrame(1);
       
-      // Set up initial scroll handler
-      updateTargetFrame();
+      // Initialize GSAP matchMedia for motion preferences
+      const mm = gsap.matchMedia();
       
-      // Start the buttery smooth easing loop
-      requestAnimationFrame(smoothScrollLoop);
+      mm.add({
+        reduceMotion: "(prefers-reduced-motion: reduce)",
+        allowMotion: "(prefers-reduced-motion: no-preference)"
+      }, (context) => {
+        const { reduceMotion } = context.conditions;
+        
+        if (reduceMotion) {
+          // Reduced motion: draw first frame and do not smooth-scroll or scrub frames
+          scrollState.frame = 1;
+          drawFrame(1);
+        } else {
+          // Normal motion: Initialize Lenis Smooth Scroll
+          const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // premium easing
+            smoothWheel: true
+          });
+          
+          // Connect Lenis to GSAP ScrollTrigger
+          lenis.on('scroll', ScrollTrigger.update);
+          
+          gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+          });
+          
+          gsap.ticker.lagSmoothing(0);
+          
+          // Animate the frames along with the scroll position using ScrollTrigger scrub
+          gsap.to(scrollState, {
+            frame: totalFrames,
+            ease: "none",
+            scrollTrigger: {
+              trigger: "body",
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 1.2, // Smoothly scrub canvas frames
+              onUpdate: () => {
+                const frameToDraw = Math.round(scrollState.frame);
+                if (frameToDraw !== lastDrawnFrame) {
+                  drawFrame(frameToDraw);
+                }
+              }
+            }
+          });
+          
+          // Custom data-speed parallax implementation via ScrollTrigger
+          gsap.utils.toArray('[data-speed]').forEach(el => {
+            const speed = parseFloat(el.getAttribute('data-speed')) || 1;
+            // Map the relative speed difference to displacement
+            const yTranslation = (speed - 1) * 150;
+            gsap.to(el, {
+              y: yTranslation,
+              ease: "none",
+              scrollTrigger: {
+                trigger: el,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+              }
+            });
+          });
+        }
+      });
     }, 600);
   }
 
-  // Scale canvas based on DPR and viewport dimensions
+  // Scale canvas for high-DPI viewports with performance limits
   function resizeCanvas() {
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const width = window.innerWidth;
@@ -184,8 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ctx.scale(dpr, dpr);
 
-    // Redraw current frame at new size
-    drawFrame(Math.round(currentFrame));
+    const frameToDraw = Math.round(scrollState.frame);
+    drawFrame(frameToDraw);
   }
 
   // Draw specific image frame onto canvas
@@ -211,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let drawWidth, drawHeight, drawX, drawY;
 
-    // Scale image containing it fully on viewport
     if (imgRatio > canvasRatio) {
       drawWidth = canvasWidth;
       drawHeight = canvasWidth / imgRatio;
@@ -229,42 +282,30 @@ document.addEventListener('DOMContentLoaded', () => {
     lastDrawnFrame = frameIndex;
   }
 
-  // Map scroll progress to a target frame
-  function updateTargetFrame() {
-    if (!scrollSection) return;
-    
-    const rect = scrollSection.getBoundingClientRect();
-    const scrollableHeight = scrollSection.offsetHeight - window.innerHeight;
-    
-    // progress is 0.0 at top of scroll section, 1.0 when scrolled to its bottom
-    const progress = Math.max(0, Math.min(1, -rect.top / scrollableHeight));
-    
-    targetFrame = Math.max(1, Math.min(totalFrames, Math.round(progress * (totalFrames - 1)) + 1));
+  // Scroll reveal helper
+  function initScrollRevealObserver() {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-10% 0px -10% 0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, observerOptions);
+
+    panelInners.forEach(panel => {
+      observer.observe(panel);
+    });
   }
 
-  // High performance interpolation animation loop
-  function smoothScrollLoop() {
-    const easeFactor = 0.08; // Adjust for scroll weight
-    const diff = targetFrame - currentFrame;
-
-    if (Math.abs(diff) > 0.005) {
-      currentFrame += diff * easeFactor;
-      const frameToDraw = Math.round(currentFrame);
-      if (frameToDraw !== lastDrawnFrame) {
-        drawFrame(frameToDraw);
-      }
-    } else if (currentFrame !== targetFrame) {
-      currentFrame = targetFrame;
-      drawFrame(Math.round(currentFrame));
-    }
-
-    requestAnimationFrame(smoothScrollLoop);
-  }
-
-  // Event Listeners
-  window.addEventListener('scroll', updateTargetFrame, { passive: true });
   window.addEventListener('resize', resizeCanvas);
 
-  // Kickstart preloader process
   preloadImages().then(revealSite);
 });
