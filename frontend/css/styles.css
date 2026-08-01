@@ -1109,8 +1109,6 @@ a {
   border-radius: 6px;
   padding: 3rem 1.5rem;
   text-align: center;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   transition: var(--transition-smooth);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
   display: flex;
@@ -1180,8 +1178,6 @@ a {
   padding: 2.5rem 1.2rem;
   text-align: center;
   border-radius: 4px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: var(--transition-fast);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
@@ -1239,8 +1235,6 @@ a {
   position: relative;
   cursor: pointer;
   background: rgba(5, 5, 5, 0.1);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
   transition: border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
@@ -1306,8 +1300,6 @@ a {
   text-align: center;
   border-radius: 4px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   position: relative;
 }
 
