@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSJ Since 1986 | Royal Emperor Rings</title>
+  <meta name="description" content="Explore the craftsmanship of the NSJ Royal Emperor Rings. Interactive 3D scroll-based visualization.">
+  
+  <!-- Preconnect and Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Montserrat:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="rings-page">
+
+  <!-- Preloader Screen -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-content">
+      <div class="brand-logo-large">NSJ</div>
+      <div class="subtitle">ROYAL RINGS</div>
+      <div class="loading-bar-container">
+        <div id="loading-bar" class="loading-bar"></div>
+      </div>
+      <div id="loading-text" class="loading-text">Loading 3D asset... 0%</div>
+    </div>
+  </div>
+
+  <!-- Fixed Canvas Background -->
+  <div class="fixed-canvas-container">
+    <canvas id="scroll-canvas"></canvas>
+    <div class="canvas-glow"></div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header id="main-header" class="navbar-header">
+    <nav class="navbar">
+      <a href="index.html" class="brand-logo" id="nav-logo">NSJ <span class="logo-est">SINCE 1986</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html#hero" class="nav-link">Home</a></li>
+        <li><a href="index.html#wedding" class="nav-link">About Us</a></li>
+        <li class="dropdown">
+          <a href="#" class="nav-link dropdown-toggle active">Products <span class="dropdown-arrow">▼</span></a>
+          <ul class="dropdown-menu">
+            <li><a href="bangles.html">Bangles</a></li>
+            <li><a href="earrings.html">Earrings</a></li>
+            <li><a href="necklace.html">Necklace</a></li>
+            <li><a href="rings.html">Rings & Couple bands</a></li>
+          </ul>
+        </li>
+        <li><a href="index.html#features" class="nav-link">Scheme | सुवर्ण स्वप्नपुर्ती</a></li>
+        <li class="dropdown">
+          <a href="#" class="nav-link dropdown-toggle">Terms of Service <span class="dropdown-arrow">▼</span></a>
+          <ul class="dropdown-menu">
+            <li><a href="index.html#features">Shipping & Returns</a></li>
+            <li><a href="index.html#features">Privacy Policy</a></li>
+            <li><a href="index.html#features">Lifetime Warranty</a></li>
+            <li><a href="index.html#features">Sourcing Ethics</a></li>
+          </ul>
+        </li>
+        <li><a href="index.html#reserve" class="nav-link">Contact Us</a></li>
+        <li><a href="index.html#reserve" class="nav-link nav-cta">Log In</a></li>
+      </ul>
+      <button class="mobile-nav-toggle" id="mobile-toggle" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content-wrapper">
+    <!-- Section 1: Hero Intro -->
+    <section class="hero-section" id="hero">
+      <div class="container text-center">
+        <h1 class="hero-title">ROYAL RINGS</h1>
+        <p class="hero-subtitle">Interactive 3D Craft Showcase</p>
+        <div class="scroll-indicator">
+          <span class="mouse-icon">
+            <span class="mouse-wheel"></span>
+          </span>
+          <span class="scroll-text">Scroll to Rotate Ring</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Craft Details -->
+    <section class="content-section" id="craft">
+      <div class="container">
+        <div class="panel-inner left" data-speed="1.1">
+          <div class="panel-label">01 / Imperial Design | Since 1986</div>
+          <h2 class="section-title">The Crown Solitaire</h2>
+          <p class="section-desc">
+            The NSJ Royal Emperor Ring features a custom crown setting, meticulously hand-formed in solid 22-karat yellow gold. Inspired by court jewels, the setting cradles the central gem to maximize brilliance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Precious Settings -->
+    <section class="content-section" id="gemstones">
+      <div class="container">
+         <div class="panel-inner right" data-speed="1.1">
+          <div class="panel-label">02 / Regal Accents | Since 1986</div>
+          <h2 class="section-title">Brilliant Solitaire & Diamonds</h2>
+          <p class="section-desc">
+            Centered around a flawless brilliant-cut solitaire and surrounded by pavé-set diamonds along the band, this ring catches light from every angle, representing the peak of luxury.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Specifications -->
+    <section class="details-section" id="specs">
+      <div class="container">
+        <div class="details-grid">
+          <div class="details-info" data-speed="0.95">
+            <h2 class="detail-section-title">Ring Artistry</h2>
+            <p class="detail-section-subtitle">Exacting heritage measurements and purity certifications.</p>
+            
+            <ul class="specs-list">
+              <li>
+                <span class="spec-name">Gold Purity</span>
+                <span class="spec-val">22k Yellow Gold (91.6% Pure Gold, Hallmarked)</span>
+              </li>
+              <li>
+                <span class="spec-name">Ring Weight</span>
+                <span class="spec-val">Approx. 12.45 Grams</span>
+              </li>
+              <li>
+                <span class="spec-name">Primary Gems</span>
+                <span class="spec-val">1 Flawless Crown Solitaire (1.80ct)</span>
+              </li>
+              <li>
+                <span class="spec-name">Accent Gems</span>
+                <span class="spec-val">38 Round Brilliant Pavé Diamonds (0.55ctw)</span>
+              </li>
+            </ul>
+          </div>
+          <div class="details-image-placeholder">
+            <div class="luxury-card" data-speed="1.15">
+              <div class="card-glow"></div>
+              <h3>Atelier Commission</h3>
+              <p>Each NSJ Royal Emperor Ring is crafted to order. Band width, solitaire sizing, engraving options, and sizing adjustments are handled privately through our personalized concierge consultation.</p>
+              <div class="registry-tag">CERTIFIED BESPOKE PIECE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Acquisition Request -->
+    <section class="reserve-section" id="reserve">
+      <div class="reserve-bg-glow"></div>
+      <div class="container text-center">
+        <h2 class="reserve-title">Acquire The Royal Ring</h2>
+        <p class="reserve-desc">
+          Submit your details to request custom sizing and configuration parameters for this piece. An NSJ personal advisor will call you to finalize your commission.
+        </p>
+        
+        <form class="reserve-form" id="acquisition-form" onsubmit="event.preventDefault(); alert('Reservation submitted successfully. Our jewelry concierge will contact you shortly.');">
+          <div class="form-group">
+            <input type="text" id="user-name" placeholder="Full Name" required aria-label="Full Name">
+          </div>
+          <div class="form-group">
+            <input type="email" id="user-email" placeholder="Email Address" required aria-label="Email Address">
+          </div>
+          <button type="submit" class="btn btn-gold" id="btn-submit-reservation">Request Allocation Details</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="brand-logo">NSJ <span class="logo-est">SINCE 1986</span></span>
+          <p class="footer-tagline">Excellence in traditional three-dimensional design.</p>
+        </div>
+        <div class="footer-links-grid">
+          <div class="footer-col">
+            <h4>Bespoke</h4>
+            <ul>
+              <li><a href="index.html#reserve">Custom Commissions</a></li>
+              <li><a href="index.html#wedding">Wedding Atelier</a></li>
+              <li><a href="index.html#features">Purity Guarantee</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>House of NSJ</h4>
+            <ul>
+              <li><a href="index.html#wedding">The Heritage</a></li>
+              <li><a href="index.html#features">Our Experts</a></li>
+              <li><a href="index.html#reserve">Private Registry</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 House of NSJ Since 1986. All rights reserved. Designed for the discerning.</p>
+        <div class="legal-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="lenis.min.js"></script>
+  <script src="rings-script.js?v=1"></script>
+</body>
+</html>
